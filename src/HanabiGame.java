@@ -24,10 +24,17 @@ public class HanabiGame {
         Deck deck = new Deck(cards);
         return deck;
     }
+
     public static void main(String[] args) {
+        List<Card> emptyList = new ArrayList<>();
+        Discards discards = new Discards(emptyList);
         Deck deck = deckBuild();
         deck.shuffle();
-        System.out.println(deck);
-        System.out.println(deck.size());
+        Player player1 = new Player("P1",deck);
+        System.out.println(player1);
+        player1.discard(player1.hand.get(0),discards);
+        System.out.println(player1);
+        player1.draw(deck);
+        System.out.println(player1);
     }
 }

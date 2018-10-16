@@ -7,6 +7,10 @@ public class Card {
         this.colour = colour;
     }
 
+    public Card prevCard() {
+        return new Card(number-1,colour);
+    }
+
     @Override
     public String toString() {
         return colour + " " + number;

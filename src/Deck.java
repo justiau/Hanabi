@@ -18,6 +18,10 @@ public class Deck {
         this.cards = newCards;
     }
 
+    public Card get(int n) {return cards.get(n);}
+
+    public void remove(int n) {cards.remove(n);}
+
     public int size() {return cards.size();}
 
     @Override
