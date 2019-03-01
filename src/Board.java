@@ -31,7 +31,7 @@ public class Board {
                 s = s + board[n];
             }
             else {
-                s = s + board[n] + " ";
+                s = s + board[n] + ", ";
             }
         }
         return s;

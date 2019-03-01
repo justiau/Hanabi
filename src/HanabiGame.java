@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class HanabiGame {
@@ -84,12 +86,28 @@ public class HanabiGame {
         HanabiGame game = new HanabiGame(3);
         game.deal(new String[]{"Steve","John","Tim"});
         game.setView();
-        for (Player p : game.players) {
+        game.players[0].learn(new HashSet<>(Arrays.asList(1,2,3)),2);
+        System.out.println(game.players[0]);
+        /*for (Player p : game.players) {
             System.out.println(p.name);
             System.out.println(p.hand);
-            for (Knowledge k : p.possibleHints())
-                System.out.println(k);
+            for (Card[] cards : p.possibleHints()) {
+                String rtn = "[";
+                boolean b = false;
+                for (Card c : cards) {
+                    if (!rtn.equals("[") || b) rtn += ",";
+                    b = true;
+                    if (c!=null) {
+                        if (c.colour==null) rtn+= c.number;
+                        else if (c.number==0) rtn+= c.colour;
+                        else rtn += c.colour + " " + c.number;
+                    }
+                    else rtn+=0;
+                }
+                rtn += "]";
+                System.out.println(rtn);
+            }
             System.out.println();
-        }
+        }*/
     }
 }
