@@ -22,7 +22,9 @@ public class Player {
         this.name = name;
         if (playercount >= 4) handLimit=4;
         knowledge = new Card[handLimit];
-        Arrays.fill(knowledge,0, handLimit-1,new Card(0,null));
+        for (int i=0; i<handLimit; i++) {
+            knowledge[i] = new Card(0, null);
+        }
         List<Card> hand = new ArrayList<>();
         while(hand.size()<handLimit && deck.size()>0) {
             hand.add(deck.get(0));
@@ -51,13 +53,18 @@ public class Player {
         else this.discard(card,discards);
     }
 
-    public void learn(Set<Integer> cardNumbers, Colour colour) {
-        for(Integer i: cardNumbers)
+    public void learn(Set<Integer> cardIndices, Colour colour) {
+        for(Integer i: cardIndices) {
             knowledge[i].colour = colour;
+        }
     }
 
-    public void learn(Set<Integer> cardNumbers, int number) {
-        for(Integer i: cardNumbers)
+    public void learn(int index, Colour colour) {
+        knowledge[index].colour = colour;
+    }
+
+    public void learn(Set<Integer> cardIndices, int number) {
+        for(Integer i: cardIndices)
             knowledge[i].number = number;
     }
 

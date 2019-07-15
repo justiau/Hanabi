@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HanabiGame {
     int playercount;
@@ -10,7 +11,7 @@ public class HanabiGame {
     Deck deck;
     Board board;
     Discards discards;
-    Player[] players = new Player[playercount];
+    Player[] players;
 
     HanabiGame(int playercount,Deck deck, Board board, Discards discards) {
         this.playercount = playercount;
@@ -83,11 +84,22 @@ public class HanabiGame {
     }
 
     public static void main(String[] args) {
-        HanabiGame game = new HanabiGame(3);
-        game.deal(new String[]{"Steve","John","Tim"});
+        HanabiGame game = new HanabiGame(4);
+        game.deal(new String[]{"Steve","John","Tim","Cat"});
         game.setView();
-        game.players[0].learn(new HashSet<>(Arrays.asList(1,2,3)),2);
-        System.out.println(game.players[0]);
+        // game.players[0].learnw(new HashSet<>(Arrays.asList(2,3)),Colour.RED);
+        Set s = new HashSet<>();
+        s.add(3);
+        s.add(2);
+        
+        HashSet t = new HashSet<>(Arrays.asList(2,3));
+        game.players[0].learn(s,Colour.RED);
+        for (Card c : game.players[0].hand) {
+            System.out.println(c);
+        }
+        for (Card c : game.players[0].knowledge) {
+            System.out.println(c);
+        }
         /*for (Player p : game.players) {
             System.out.println(p.name);
             System.out.println(p.hand);
