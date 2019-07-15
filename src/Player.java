@@ -1,19 +1,18 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 public class Player {
     String name;
     List<Card> hand;
-    List<View> view = new ArrayList<>();
+    List<View> views = new ArrayList<>();
     Card[] knowledge;
     int handLimit = 5;
 
-    Player(String name, List<Card> hand, List<View> view, int playercount, Card[] knowledge) {
+    Player(String name, List<Card> hand, List<View> views, int playercount, Card[] knowledge) {
         this.name = name;
         this.hand = hand;
-        this.view = view;
+        this.views = views;
         this.knowledge = knowledge;
         if (playercount >= 4) handLimit=4;
     }
@@ -33,34 +32,30 @@ public class Player {
         this.hand = hand;
     }
 
-    public void draw(Deck deck, int players) {
+    public void draw(Deck deck) {
         if (hand.size() < handLimit && deck.size() > 0) {
             hand.add(deck.get(0));
             deck.remove(0);
         }
     }
 
-    public void discard(Card card, Discards discards) {
+    public void discard(Card card, Board board) {
         hand.remove(card);
-        discards.add(card);
+        board.discards.add(card);
     }
 
-    public void play(Card card, Board board, Discards discards) {
+    public void play(Card card, Board board) {
         if (board.contains(card.prevCard())) {
             board.update(card);
             hand.remove(card);
         }
-        else this.discard(card,discards);
+        else this.discard(card,board);
     }
 
     public void learn(Set<Integer> cardIndices, Colour colour) {
         for(Integer i: cardIndices) {
             knowledge[i].colour = colour;
         }
-    }
-
-    public void learn(int index, Colour colour) {
-        knowledge[index].colour = colour;
     }
 
     public void learn(Set<Integer> cardIndices, int number) {
@@ -95,6 +90,18 @@ public class Player {
             if (b == true) hints.add(hint);
         }
         return hints;
+    }
+
+    public void showView() {
+        for(View v : views) {
+            System.out.println(v);
+        }
+    }
+
+    public void showKnowledge() {
+        for (Card c : knowledge) {
+            System.out.println(c);
+        }
     }
 
     public MoveType generateMove() {

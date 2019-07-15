@@ -7,6 +7,11 @@ public class Card {
         this.colour = colour;
     }
 
+    public boolean equals(Card card) {
+        if (card.colour.equals(colour)&&card.number==number) return true;
+        return false;
+    }
+
     public Card prevCard() {
         return new Card(number-1,colour);
     }
