@@ -42,15 +42,11 @@ public class Board {
         System.out.println("Hints: " + hints);
         System.out.println("Bombs: " + bombs);
         System.out.println("Discards: " + discards);
-        String s = "";
-        for (int n = 0; n < 5; n++) {
-            if (n==4) {
-                s = s + board[n];
-            }
-            else {
-                s = s + board[n] + ", ";
-            }
+        String rtn = "";
+        for (Card c : board) {
+            if (rtn != "") rtn += "\n";
+            rtn += c.colour + ": " + c.number;
         }
-        return s;
+        return "\n" + rtn + "\n";
     }
 }

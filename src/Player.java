@@ -1,15 +1,19 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Player {
     String name;
     List<Card> hand;
     List<View> views = new ArrayList<>();
-    Card[] knowledge;
+    List<Card> knowledge;
     int handLimit = 5;
 
-    Player(String name, List<Card> hand, List<View> views, int playercount, Card[] knowledge) {
+    Player(String name, List<Card> hand, List<View> views, int playercount, List<Card> knowledge) {
         this.name = name;
         this.hand = hand;
         this.views = views;
@@ -20,9 +24,9 @@ public class Player {
     Player(String name, Deck deck, int playercount) {
         this.name = name;
         if (playercount >= 4) handLimit=4;
-        knowledge = new Card[handLimit];
+        knowledge = new ArrayList<Card>();
         for (int i=0; i<handLimit; i++) {
-            knowledge[i] = new Card(0, null);
+            knowledge.add(new Card(0, null));
         }
         List<Card> hand = new ArrayList<>();
         while(hand.size()<handLimit && deck.size()>0) {
@@ -39,57 +43,70 @@ public class Player {
         }
     }
 
-    public void discard(Card card, Board board) {
-        hand.remove(card);
-        board.discards.add(card);
+    public void discard (int index, Board board) {
+        hand.remove(index);
+        board.discards.add(hand.get(index));   
+        knowledge.remove(index);
     }
 
-    public void play(Card card, Board board) {
+    public void play(int index, Board board) {
+        Card card = hand.get(index);
         if (board.contains(card.prevCard())) {
             board.update(card);
-            hand.remove(card);
+            hand.remove(index);
+            knowledge.remove(index);
         }
-        else this.discard(card,board);
+        else discard(index,board);
     }
 
-    public void learn(Set<Integer> cardIndices, Colour colour) {
-        for(Integer i: cardIndices) {
-            knowledge[i].colour = colour;
+    public void learn(Hint hint) {
+        if (hint.colour==null) {
+            for (Integer i: hint.cardIndices) {
+                knowledge.get(i).number = hint.number;
+            }
+        } else {
+            for (Integer i: hint.cardIndices) {
+                knowledge.get(i).colour = hint.colour;
+            }
         }
     }
 
-    public void learn(Set<Integer> cardIndices, int number) {
-        for(Integer i: cardIndices)
-            knowledge[i].number = number;
-    }
-
-    public List<Card[]> possibleHints() {
-        List<Card[]> hints = new ArrayList<>();
+    public List<Hint> getHints() {
+        List<Hint> hints = new ArrayList<>();
         boolean b;
-        Card[] hint;
-        for (int i = 1; i <= 5; i++) {
-            hint = new Card[hand.size()];
+        Set<Integer> indices;
+        for (int i = 1; i <= 5; i++) { //iterate over possible numbers
+            indices = new HashSet<>();
             b = false;
-            for (int j = 0; j < hand.size(); j++) {
+            for (int j = 0; j < hand.size(); j++) { //compare current number with numbers in hand
                 if (hand.get(j).number == i) {
-                    hint[j] = new Card(i, null);
+                    indices.add(j);
                     b = true;
                 }
             }
-            if (b == true) hints.add(hint);
+            if (b == true) hints.add(new Hint(indices,i)); //if any number is matched, add array to list
         }
-        for (Colour c : Colour.values()) {
-            hint = new Card[hand.size()];
+        for (Colour c : Colour.values()) {  //iterate over possible colours
+            indices = new HashSet<>();
             b = false;
-            for (int j = 0; j < hand.size(); j++) {
+            for (int j = 0; j < hand.size(); j++) { //compare current colour with colours in hand
                 if (hand.get(j).colour == c) {
-                    hint[j] = new Card(0, c);
+                    indices.add(j);
                     b = true;
                 }
             }
-            if (b == true) hints.add(hint);
+            if (b == true) hints.add(new Hint(indices,c)); //if any colour is matched, add new hint to list
         }
         return hints;
+    }
+
+    public void showHints() {
+        System.out.println(name);
+        System.out.println(hand);
+        List<Hint> hints = getHints();
+        for (int i=0; i<hints.size(); i++) {
+            System.out.println(i+1 + ": " + hints.get(i));
+        }
     }
 
     public void showView() {
@@ -113,14 +130,14 @@ public class Player {
         String rtn1 = name + " " + hand;
         String rtn2 = "";
         for (int i=0; i<hand.size();i++) {
-            if (knowledge[i] != null) {
+            if (knowledge.get(i) != null) {
                 rtn2 += "\n";
-                if (knowledge[i].colour==null)
-                    rtn2 += "Card " + i + " is a " + knowledge[i].number;
-                else if (knowledge[i].number==0)
-                    rtn2 += "Card " + i + " is " + knowledge[i].colour;
+                if (knowledge.get(i).colour==null)
+                    rtn2 += "Card " + i + " is a " + knowledge.get(i).number;
+                else if (knowledge.get(i).number==0)
+                    rtn2 += "Card " + i + " is " + knowledge.get(i).colour;
                 else {
-                    rtn2 += "Card " + i + " is a " + knowledge[i].number + " " + knowledge[i].colour;
+                    rtn2 += "Card " + i + " is a " + knowledge.get(i).number + " " + knowledge.get(i).colour;
                 }
             }
         }

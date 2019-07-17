@@ -18,6 +18,7 @@ public class Card {
 
     @Override
     public String toString() {
-        return colour + " " + number;
+        if (colour == null) return number + "";
+        else return colour + " " + number;
     }
 }
