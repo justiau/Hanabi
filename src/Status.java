@@ -1,0 +1,3 @@
+public enum Status {
+    OK, REPEAT, VICTORY, DEFEAT, LASTCARD, LASTROUND, NEWGAME, EXIT;
+}

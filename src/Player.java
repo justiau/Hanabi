@@ -33,11 +33,14 @@ public class Player {
         this.hand = hand;
     }
 
-    public void draw(Deck deck) {
+    public Status draw(Deck deck) {
         if (hand.size() < handLimit && deck.size() > 0) {
             hand.add(deck.get(0));
             deck.remove(0);
+            if (deck.size()==0) return Status.LASTCARD;
+            return Status.OK;
         }
+        return Status.LASTROUND;
     }
 
     public void discard (int index, Board board) {
@@ -47,17 +50,19 @@ public class Player {
         knowledge.add(new Card(0, null));
     }
 
-    public boolean play(int index, Board board) {
+    public Status play(int index, Board board) {
         Card card = hand.get(index);
         if (board.contains(card.prevCard())) {
             board.update(card);
             hand.remove(index);
             knowledge.remove(index);
             knowledge.add(new Card(0, null));
-            return true;
+            if (board.isVictory()) return Status.VICTORY;
+            return Status.OK;
         }
         discard(index,board);
-        return false;    
+        if (board.isLastBomb()) return Status.DEFEAT;
+        return Status.OK;
     }
 
     public void learn(Hint hint) {
@@ -120,6 +125,10 @@ public class Player {
         for (Card c : knowledge) {
             System.out.println(c);
         }
+    }
+
+    public void showHand() {
+        System.out.println(hand);
     }
 
     @Override

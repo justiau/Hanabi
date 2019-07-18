@@ -22,21 +22,29 @@ public class Board {
         return 0;
     }
 
-    public boolean mistake() {
-        if (bombs++ == 3) return true;
-        return false;
-    }
-
     public boolean useHint() {
         if (hints < 1) return false;
         hints--;
         return true;
     }
 
-    public boolean getHint() {
+    public boolean addHint() {
         if (hints > 7) return false;
         hints++;
         return true;
+    }
+
+    public boolean isLastBomb() {
+        if (bombs++ == 3) return true;
+        return false;
+    }
+
+    public boolean isVictory() {
+        boolean vic = true;
+        for (Card c : board) {
+            if (c.number != 5) vic = false;
+        }
+        return vic;
     }
 
     public void update(Card card) {
@@ -52,6 +60,14 @@ public class Board {
 
     public void show() {
         System.out.println(this);
+    }
+
+    public int getScore() {
+        int sum = 0;
+        for (Card c : board) {
+            sum+=c.number;
+        }
+        return sum;
     }
 
     @Override
