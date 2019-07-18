@@ -1,9 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class Player {
@@ -44,19 +41,23 @@ public class Player {
     }
 
     public void discard (int index, Board board) {
+        board.discards.add(hand.get(index));
         hand.remove(index);
-        board.discards.add(hand.get(index));   
         knowledge.remove(index);
+        knowledge.add(new Card(0, null));
     }
 
-    public void play(int index, Board board) {
+    public boolean play(int index, Board board) {
         Card card = hand.get(index);
         if (board.contains(card.prevCard())) {
             board.update(card);
             hand.remove(index);
             knowledge.remove(index);
+            knowledge.add(new Card(0, null));
+            return true;
         }
-        else discard(index,board);
+        discard(index,board);
+        return false;    
     }
 
     public void learn(Hint hint) {
@@ -119,10 +120,6 @@ public class Player {
         for (Card c : knowledge) {
             System.out.println(c);
         }
-    }
-
-    public MoveType generateMove() {
-        return MoveType.values()[(int)(Math.random()*3)];
     }
 
     @Override

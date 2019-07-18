@@ -1,8 +1,9 @@
 import java.util.Set;
 
-public class Hint {
+public class Hint extends Action{
     Colour colour;
     Integer number;
+    Integer playerIndex;
     Set<Integer> cardIndices;
 
     Hint(Set<Integer> cardIndices, Colour colour) {
@@ -13,6 +14,10 @@ public class Hint {
     Hint (Set<Integer> cardIndices, Integer number) {
         this.cardIndices = cardIndices;
         this.number = number;
+    }
+
+    public void setPlayerIndex(Integer playerIndex) {
+        this.playerIndex = playerIndex;
     }
 
     @Override

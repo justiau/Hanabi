@@ -22,6 +22,23 @@ public class Board {
         return 0;
     }
 
+    public boolean mistake() {
+        if (bombs++ == 3) return true;
+        return false;
+    }
+
+    public boolean useHint() {
+        if (hints < 1) return false;
+        hints--;
+        return true;
+    }
+
+    public boolean getHint() {
+        if (hints > 7) return false;
+        hints++;
+        return true;
+    }
+
     public void update(Card card) {
         board[getBoardIndexForColour(card)] = card;
     }
