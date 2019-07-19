@@ -10,6 +10,7 @@ public class HanabiGame {
     Board board;
     Player[] players;
     int remainingTurns = -1;
+    private static final Scanner in = new Scanner(System.in);
 
     HanabiGame(int playercount, Deck deck, Board board) {
         this.playercount = playercount;
@@ -41,14 +42,6 @@ public class HanabiGame {
             for (int j = 0; j < i; j++) players[i].views.add(new View(players[j].name,players[j].hand));
         }
     }
-
-        // for (int i = 0; i < playercount; i++) {
-        //     for (int j = 0; j < playercount; j++) {
-        //         if (i != j)
-        //             players[i].views.add(new View(players[j].name, players[j].hand));
-        //     }
-        // }
-    // }
 
     public static Board boardBuild() {
         Card[] cards = new Card[5];
@@ -130,13 +123,64 @@ public class HanabiGame {
         return null;
     }
 
+    public Command getCommand() {
+        Command command;
+        Integer index;
+        String name;
+        do {
+            command = parseCommand(in.nextLine());
+            if (command.commandType==CommandType.DISCARD || command.commandType==CommandType.PLAY) {
+                if (command.index==null) {
+                    System.out.println("Enter card index:");
+                    index = (Integer) getArg(in.nextLine());
+                    if (index==null) System.out.println("Index not recognized");  
+                    else command.index=index;
+                }
+            } else if (command.commandType==CommandType.HINT) {
+                if (command.playerName==null) {
+                    System.out.println(getOtherNames());
+                    System.out.println("Enter player name:");
+                    name = (String) getArg(in.nextLine());
+                    if (name==null) System.out.println("Name not recognized");
+                    command.playerName=name;
+                }
+                if (command.playerName!=null) {
+                    if (command.index==null) {
+                        Player p = getPlayer(command.playerName);
+                        p.showHints();
+                        System.out.println("Enter hint number:");
+                        index = (Integer) getArg(in.nextLine());
+                        if (index==null) System.out.println("Hint number not recognized");
+                        else command.index=index;
+                    }
+                }
+            }
+        } while (!validateCommand(command));
+        
+        return command;
+    }
+
+    private Object getArg(String input) {
+        if (input.matches("\\d")) return Integer.parseInt(input);
+        if (getPlayer(input) != null) return input;
+        return null;
+    }
+
     public boolean validateCommand(Command command) {
         if (command == null) return false;
         if (command.commandType == CommandType.PLAY || command.commandType == CommandType.DISCARD) {
+            if (command.index == null) {
+                System.out.println("Null index error");
+                return false;
+            }
             if (command.index >= 0 && command.index < players[playerindex].hand.size()) return true;
+            System.out.println("Invalid index error");
             return false;
         } else if (command.commandType == CommandType.HINT) {
-            if (getPlayer(command.playerName) != null) return true;
+            if (command.playerName!=null&&command.index!=null) {
+                if (getPlayer(command.playerName)!=null) return true;
+                System.out.println("Name is not recognized");
+            }
             return false;
         }
         return true;
@@ -164,9 +208,7 @@ public class HanabiGame {
                 Player p = getPlayer(command.playerName);
                 List<Hint> hints = p.getHints();
                 p.showHints();
-                Scanner in = new Scanner(System.in);
-                Integer hintnum = Integer.parseInt(in.nextLine());
-                Hint hint = hints.get(hintnum - 1);
+                Hint hint = hints.get(command.index - 1);
                 if (board.useHint()) {
                     p.learn(hint);
                     System.out.println("Telling " + p.name + " that " + hint.toString().toLowerCase());
@@ -178,6 +220,10 @@ public class HanabiGame {
                     System.out.println("There are no hints left to use");
                     return Status.REPEAT;
                 }
+            case AI:
+                AI ai = new AI(this);
+                Command aiCommand = ai.generateCommand();
+                return handleCommand(aiCommand);
             case HELP:
                 System.out.println(Arrays.asList(CommandType.values()));
                 return Status.REPEAT;
@@ -215,25 +261,18 @@ public class HanabiGame {
     }
 
     public Status run() {
-        Scanner in = new Scanner(System.in);
-        Command command;
         Status status;
         List<Status> endStatuses = Arrays.asList(Status.VICTORY,Status.DEFEAT,Status.EXIT,Status.NEWGAME);
         do {
-            do {
-                board.show();
-                showCurrentPlayer();
-                players[playerindex].showView();
-                command = parseCommand(in.nextLine());
-                if (!validateCommand(command)) System.out.println("\nInvalid command\n");
-            } while (!validateCommand(command));
-            status = handleCommand(command);
-        } while(!endStatuses.contains(status));
+            board.show();
+            showCurrentPlayer();
+            players[playerindex].showView();
+            status = handleCommand(getCommand());
+        } while (!endStatuses.contains(status));
         return status;
     }
 
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
         Status status;
         String input;
         HanabiGame game;
@@ -261,169 +300,5 @@ public class HanabiGame {
             if (input.equals("exit")) status = Status.EXIT;
         } while (status != Status.EXIT);
         in.close();
-        // while (true) {
-        //     user = game.players[game.playerindex];
-        //     game.board.show();
-        //     user.showView();
-        //     input = in.nextLine();
-        //     if (input.contains("play")) {
-        //         String playargs[] = input.split(" ");
-        //         if (playargs.length == 1) {
-        //             System.out.println("Enter the index of the card you would like to play:");
-        //             index = Integer.parseInt(in.nextLine());
-        //             if (!user.play(index, game.board)) {
-        //                 if (game.board.isLastBomb()) {
-        //                     System.out.println("Game over. All bombs have been activated");
-        //                     game = newGame();
-        //                 }
-        //             } else {
-        //                 user.play(index, game.board);
-        //                 user.draw(game.deck);
-        //                 game.next();
-        //             }
-        //         } else if (playargs.length == 2) {
-        //             if (playargs[1].matches("\\d+")) {
-        //                 index = Integer.parseInt(playargs[1]);
-        //                 if (playargs[0].equals("play") && index < user.hand.size() && index >= 0) {
-        //                     if (!user.play(index, game.board)) {
-        //                         if (game.board.isLastBomb()) {
-        //                             System.out.println("Game over. All bombs have been activated");
-        //                             game = newGame();
-        //                         }
-        //                     } else {
-        //                         user.play(index, game.board);
-        //                         user.draw(game.deck);
-        //                         game.next();
-        //                     }
-        //                 } else System.out.println("Invalid use of play");
-        //             } else System.out.println("Invalid use of play");
-        //         } else System.out.println("Invalid use of play");
-        //         game.next();
-        //     } else if (input.contains("hint")) {
-        //         if (!game.board.useHint()) continue;
-        //         String hintargs[] = input.split(" ");
-        //         if (hintargs.length == 1) {
-        //             System.out.println(game.getOtherNames());
-        //             System.out.println("Enter the name of the player you would like to hint:");
-        //             String playername = in.nextLine();
-        //             Player p = game.getPlayer(playername);
-        //             if (p != null) {
-        //                 List<Hint> hints = p.getHints();
-        //                 p.showHints();
-        //                 Integer hintnum = Integer.parseInt(in.nextLine());
-        //                 Hint hint = hints.get(hintnum - 1);
-        //                 if (hintnum <= hints.size() && hintnum >= 1) {
-        //                     p.learn(hint);
-        //                     System.out.println("Telling " + p.name + " that " + hint.toString().toLowerCase());
-        //                     System.out.println(p.name + " now knows " + p.knowledge);
-        //                     game.next();
-        //                 } else {
-        //                     System.out.println("Hint number was not recognised");
-        //                 }
-        //             } else System.out.println("Player name not recognised");
-        //         }
-        //         else if (hintargs.length == 2) {
-        //             Player p = game.getPlayer(hintargs[1]);
-        //             if (p!=null) {
-        //                 List<Hint> hints = p.getHints();
-        //                 p.showHints();
-        //                 Integer hintnum = Integer.parseInt(in.nextLine());
-        //                 Hint hint = hints.get(hintnum - 1);
-        //                 if (hintnum <= hints.size() && hintnum >= 1) {
-        //                     p.learn(hint);
-        //                     System.out.println("Telling " + p.name + " that " + hint.toString().toLowerCase());
-        //                     System.out.println(p.knowledge);
-        //                     game.next();
-        //                 } else {
-        //                     System.out.println("Hint number was not recognised");
-        //                 }
-        //             } else {
-        //                 System.out.println("Player name not recognised");
-        //             }
-        //         }
-        //         else {
-        //             System.out.println("Invalid use of hint");
-        //         }
-        //     } else if (input.equals("board")) {
-        //     } else if (input.equals("hints")) {
-        //         for (Player p : game.players) {
-        //             if (!user.equals(p))
-        //                 p.showHints();
-        //         }
-        //     } else if (input.contains("discard")) {
-        //         String discardargs[] = input.split(" ");
-        //         if (discardargs.length == 1) {
-        //             System.out.println("Enter the index of the card you would like to discard:");
-        //             index = Integer.parseInt(in.nextLine());
-        //             game.board.addHint();
-        //             user.discard(index, game.board);
-        //             user.draw(game.deck);
-        //             game.next();
-        //         } else if (discardargs.length == 2) {
-        //             if (discardargs[1].matches("-?\\d+")) {
-        //                 index = Integer.parseInt(discardargs[1]);
-        //                 if (discardargs[0].equals("discard") && index < user.hand.size() && index >= 0) {
-        //                     game.board.addHint();
-        //                     user.discard(index, game.board);
-        //                     user.draw(game.deck);
-        //                     game.next();
-        //                 } else {
-        //                     System.out.println("Invalid use of discard");
-        //                 }
-        //             } else {System.out.println("Invalid use of discard");
-        //             }
-        //         } else {
-        //             System.out.println("Invalid use of discard");
-        //         }
-        //         game.next();
-        //     } else if (input.equals("new")) {
-        //         game = newGame();
-        //     } else if (input.equals("ai")) {
-        //         AI ai = new AI(game);
-        //         Action action = ai.generateAction();
-        //         switch (action.getClass().getName()) {
-        //             case "Play":
-        //                 Play play = (Play) action;
-        //                 if (!user.play(play.index, game.board)) {
-        //                     if(game.board.isLastBomb()) {
-        //                         System.out.println("Game over. All bombs have been activated");;
-        //                         game = newGame();
-        //                     }
-        //                 } else {
-        //                     user.draw(game.deck);
-        //                     game.next();
-        //                 }
-        //                 break;
-        //             case "Discard":
-        //                 Discard discard = (Discard) action;
-        //                 user.discard(discard.index, game.board);
-        //                 game.board.addHint();
-        //                 user.draw(game.deck);
-        //                 game.next();
-        //                 break;
-        //             case "Hint":
-        //                 if (game.board.useHint()) {
-        //                     Hint hint = (Hint) action;
-        //                     Player p = game.players[hint.playerIndex];
-        //                     p.learn(hint);
-        //                     System.out.println("Telling " + p.name + " that " + hint.toString().toLowerCase());
-        //                     System.out.println(p.knowledge);
-        //                     game.next();
-        //                 }
-        //                 break;
-        //         }
-        //     } else if (input.equals("help")) {
-        //         System.out.println("play hint discard new help cheat show");
-        //     } else if (input.equals("cheat")) {
-        //         System.out.println(user.hand);
-        //     } else if (input.equals("knowledge")) {
-        //         user.showKnowledge();
-        //     } else if (input.equals("exit"))
-        //         break;
-        //     else {
-        //         System.out.println("\n\"" + input + "\" was not recognised as a valid command\nPlease try again or type \"help\" for a list of commands ");
-        //     }
-        // }
-        // in.close();
     }
 }

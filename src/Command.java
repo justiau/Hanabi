@@ -23,10 +23,7 @@ public class Command {
     }
 
     public static void main(String args[]) {
-        // Scanner in = new Scanner(System.in);
         String input = "play -2";
         System.out.println(HanabiGame.parseCommand(input));
-
-        // in.close();
     }
 }

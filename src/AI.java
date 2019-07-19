@@ -5,10 +5,10 @@ public class AI {
         this.game = game;
     }
 
-    public Action generateAction() {
+    public Command generateCommand() {
         Player player = game.players[game.playerindex];
         Integer index = (int) (Math.random() * player.hand.size());
-        return new Play(index);
+        return new Command(CommandType.PLAY, index);
     }
 
     public static void main (String args[]) {
@@ -16,6 +16,6 @@ public class AI {
         game.deal(new String[] { "Justin", "Alice", "Bob", "Charlie" });
         game.setView();
         AI ai = new AI(game);
-        System.out.println(ai.generateAction());
+        System.out.println(ai.generateCommand());
     }
 }

@@ -1,6 +1,6 @@
 import java.util.Set;
 
-public class Hint extends Action{
+public class Hint{
     Colour colour;
     Integer number;
     Integer playerIndex;

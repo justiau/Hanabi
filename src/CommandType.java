@@ -1,5 +1,5 @@
 public enum CommandType {
-    PLAY, DISCARD, HINT, HELP, NEW, CHEAT, KNOWLEDGE, SHOW, EXIT;
+    PLAY, DISCARD, HINT, HELP, NEW, CHEAT, KNOWLEDGE, AI, SHOW, EXIT;
 
     public static String[] stringValues() {
         int size = CommandType.values().length;
